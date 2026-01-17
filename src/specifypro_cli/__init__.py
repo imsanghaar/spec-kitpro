@@ -45,6 +45,7 @@ from rich.live import Live
 from rich.align import Align
 from rich.table import Table
 from rich.tree import Tree
+from rich.box import ROUNDED
 from typer.core import TyperGroup
 
 # For cross-platform keyboard input
@@ -233,15 +234,11 @@ SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
 
 BANNER = """
-███████╗██████╗ ███████╗ ██████╗██╗███████╗██╗   ██╗██████╗ ██████╗  ██████╗
-██╔════╝██╔══██╗██╔════╝██╔════╝██║██╔════╝╚██╗ ██╔╝██╔══██╗██╔══██╗██╔══██╗
-███████╗██████╔╝█████╗  ██║     ██║█████╗   ╚████╔╝ ██████╔╝██████╔╝██║  ██║
-╚════██║██╔═══╝ ██╔══╝  ██║     ██║██╔══╝    ╚██╔╝  ██╔═══╝ ██╔══██╗██║  ██║
-███████║██║     ███████╗╚██████╗██║██║        ██║   ██║     ██║  ██║╚████╔╝ 
-╚══════╝╚═╝     ╚══════╝ ╚═════╝╚═╝╚═╝        ╚═╝   ╚═╝     ╚═╝  ╚═╝ ╚═══╝  
+SpecifyPro CLI
+Version 1.0.0
 """
 
-TAGLINE = "Imam Sanghaar's SpecKitPro - Spec-Driven Development Toolkit"
+TAGLINE = "[bold]Imam Sanghaar's SpecKitPro - Spec-Driven Development Toolkit[/bold]"
 class StepTracker:
     """Track and render hierarchical steps without emojis, similar to Claude Code tree output.
     Supports live auto-refresh via an attached refresh callback.
@@ -292,7 +289,14 @@ class StepTracker:
                 pass
 
     def render(self):
-        tree = Tree(f"[cyan]{self.title}[/cyan]", guide_style="grey50")
+        # Create a more card-like representation of the steps
+        from rich.box import ROUNDED
+
+        # Create a panel for the entire tracker
+        content = Table.grid(padding=(0, 1))
+        content.add_column(min_width=2)
+        content.add_column()
+
         for step in self.steps:
             label = step["label"]
             detail_text = step["detail"].strip() if step["detail"] else ""
@@ -324,8 +328,16 @@ class StepTracker:
                 else:
                     line = f"{symbol} [white]{label}[/white]"
 
-            tree.add(line)
-        return tree
+            content.add_row("", line)
+
+        tracker_panel = Panel(
+            content,
+            title=f"[bold cyan]{self.title}[/bold cyan]",
+            border_style="cyan",
+            padding=(1, 2)
+        )
+
+        return tracker_panel
 
 def get_key():
     """Get a single keypress in a cross-platform way using readchar."""
@@ -350,12 +362,12 @@ def get_key():
 def select_with_arrows(options: dict, prompt_text: str = "Select an option", default_key: str = None) -> str:
     """
     Interactive selection using arrow keys with Rich Live display.
-    
+
     Args:
         options: Dict with keys as option keys and values as descriptions
         prompt_text: Text to show above the options
         default_key: Default option key to start with
-        
+
     Returns:
         Selected option key
     """
@@ -375,18 +387,19 @@ def select_with_arrows(options: dict, prompt_text: str = "Select an option", def
 
         for i, key in enumerate(option_keys):
             if i == selected_index:
-                table.add_row("▶", f"[cyan]{key}[/cyan] [dim]({options[key]})[/dim]")
+                table.add_row("▶", f"[bold][cyan]{key}[/cyan][/bold] [dim]({options[key]})[/dim]")
             else:
                 table.add_row(" ", f"[cyan]{key}[/cyan] [dim]({options[key]})[/dim]")
 
         table.add_row("", "")
-        table.add_row("", "[dim]Use ↑/↓ to navigate, Enter to select, Esc to cancel[/dim]")
+        table.add_row("", "[dim]Use UP/DOWN arrows to navigate, Enter to select, Esc to cancel[/dim]")
 
         return Panel(
             table,
-            title=f"[bold]{prompt_text}[/bold]",
-            border_style="cyan",
-            padding=(1, 2)
+            title=f"[bold blue]>>> {prompt_text} <<<[/bold blue]",
+            border_style="blue",
+            padding=(1, 2),
+            expand=False
         )
 
     console.print()
@@ -451,8 +464,21 @@ def show_banner():
         color = colors[i % len(colors)]
         styled_banner.append(line + "\n", style=color)
 
-    console.print(Align.center(styled_banner))
-    console.print(Align.center(Text(TAGLINE, style="italic bright_yellow")))
+    # Create a banner panel with a decorative border
+    content = Text()
+    content.append(styled_banner.plain, style="bold blue")
+    content.append("\n")
+    content.append(TAGLINE.replace("[bold]", "").replace("[/bold]", ""), style="italic bright_yellow")
+
+    banner_panel = Panel(
+        Align.center(content),
+        border_style="bold blue",
+        padding=(1, 2),
+        title="[bold blue]SpecifyPro CLI[/bold blue]",
+        expand=False
+    )
+
+    console.print(banner_panel)
     console.print()
 
 @app.callback()
@@ -460,7 +486,13 @@ def callback(ctx: typer.Context):
     """Show banner when no subcommand is provided."""
     if ctx.invoked_subcommand is None and "--help" not in sys.argv and "-h" not in sys.argv:
         show_banner()
-        console.print(Align.center("[dim]Run 'specifypro --help' for usage information[/dim]"))
+        help_panel = Panel(
+            "[dim]Run 'specifypro --help' for usage information[/dim]",
+            border_style="dim",
+            padding=(0, 1),
+            expand=False
+        )
+        console.print(Align.center(help_panel))
         console.print()
 
 def run_command(cmd: list[str], check_return: bool = True, capture: bool = False, shell: bool = False) -> Optional[str]:
@@ -982,6 +1014,20 @@ def init(
 
     show_banner()
 
+    # Show welcome message with available selections
+    welcome_panel = Panel(
+        "[bold]Welcome to SpecifyPro![/bold]\n\n"
+        "You will be guided through the setup process with interactive selections:\n"
+        "• [cyan]AI Assistant Selection[/cyan]: Choose your preferred AI coding assistant\n"
+        "• [cyan]Script Type Selection[/cyan]: Choose between POSIX Shell or PowerShell scripts\n\n"
+        "[dim]Use ↑/↓ arrow keys to navigate, Enter to select[/dim]",
+        title="[bold green]Setup Process[/bold green]",
+        border_style="green",
+        padding=(1, 2)
+    )
+    console.print(welcome_panel)
+    console.print()
+
     if project_name == ".":
         here = True
         project_name = None  # Clear project_name to use existing validation logic
@@ -1090,6 +1136,19 @@ def init(
 
     console.print(f"[cyan]Selected AI assistant:[/cyan] {selected_ai}")
     console.print(f"[cyan]Selected script type:[/cyan] {selected_script}")
+
+    # Show selection summary in a card-like format
+    summary_panel = Panel(
+        f"[bold]Configuration Summary:[/bold]\n\n"
+        f"• [cyan]AI Assistant:[/cyan] {AGENT_CONFIG[selected_ai]['name']}\n"
+        f"• [cyan]Script Type:[/cyan] {SCRIPT_TYPE_CHOICES[selected_script]}\n"
+        f"• [cyan]Project:[/cyan] {project_path.name}",
+        title="[bold yellow]Setup Configuration[/bold yellow]",
+        border_style="yellow",
+        padding=(1, 2)
+    )
+    console.print(summary_panel)
+    console.print()
 
     tracker = StepTracker("Initialize SpecifyPro Project")
 

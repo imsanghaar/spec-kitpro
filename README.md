@@ -43,20 +43,24 @@ Spec-Driven Development **flips the script** on traditional software development
 
 ### 1. Install SpecifyPro CLI
 
-### Option 1: Standard Installation (Recommended)
-
-Install using pip:
+Install using `uv` (Recommended):
 
 ```bash
-pip install specifypro
+uv tool install specifypro-cli --from git+https://github.com/imsanghaar/spec-kitpro
 ```
 
-### Option 2: Persistent Installation (Legacy/uv)
-
-Install once and use everywhere:
+To upgrade SpecifyPro, see the [Upgrade Guide](./docs/upgrade.md) for detailed instructions. Quick upgrade:
 
 ```bash
-uv tool install specifypro-cli --from git+https://github.com/github/spec-kit.git
+uv tool install specifypro-cli --force --from git+https://github.com/imsanghaar/spec-kitpro
+```
+
+#### One-time Usage
+
+Run directly without installing:
+
+```bash
+uvx --from git+https://github.com/imsanghaar/spec-kitpro specifypro init <PROJECT_NAME>
 ```
 
 Then use the tool directly:
@@ -74,10 +78,32 @@ specifypro init --here --ai claude
 specifypro check
 ```
 
+Alternatively, you can create an alias for convenience:
+
+```bash
+# On Linux/Mac
+alias sp=specifypro
+
+# On Windows PowerShell
+Set-Alias -Name sp -Value specifypro
+```
+
+Then use:
+
+```bash
+# Create new project
+sp init <PROJECT_NAME>
+
+# Or initialize in existing project
+sp init . --ai claude
+# or
+sp init --here --ai claude
+```
+
 To upgrade SpecifyPro, see the [Upgrade Guide](./docs/upgrade.md) for detailed instructions. Quick upgrade:
 
 ```bash
-uv tool install specifypro-cli --force --from git+https://github.com/github/spec-kit.git
+uv tool install specifypro-cli --force --from git+https://github.com/imsanghaar/spec-kitpro
 ```
 
 #### Option 2: One-time Usage
@@ -85,7 +111,7 @@ uv tool install specifypro-cli --force --from git+https://github.com/github/spec
 Run directly without installing:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specifypro init <PROJECT_NAME>
+uvx --from git+https://github.com/imsanghaar/spec-kitpro specifypro init <PROJECT_NAME>
 ```
 
 **Benefits of persistent installation:**
@@ -349,24 +375,38 @@ If you encounter issues with an agent, please open an issue so we can refine the
 You can use the SpecifyPro CLI to bootstrap your project, which will bring in the required artifacts in your environment. Run:
 
 ```bash
+# Using the full command
 specifypro init <project_name>
+
+# Or using the alias (after setting it up)
+sp init <project_name>
 ```
 
 Or initialize in the current directory:
 
 ```bash
+# Full command
 specifypro init .
+
+# Or using alias
+sp init .
+
 # or use the --here flag
 specifypro init --here
+sp init --here
+
 # Skip confirmation when the directory already has files
 specifypro init . --force
+sp init . --force
+
 # or
 specifypro init --here --force
+sp init --here --force
 ```
 
 ![SpecifyPro CLI bootstrapping a new project in the terminal](./media/specify_cli.gif)
 
-You will be prompted to select the AI agent you are using. You can also proactively specifypro it directly in the terminal:
+You will be prompted to select the AI agent you are using through an interactive menu. You can also proactively specify it directly in the terminal:
 
 ```bash
 specifypro init <project_name> --ai claude
@@ -387,6 +427,8 @@ specifypro init . --force --ai claude
 # or
 specifypro init --here --force --ai claude
 ```
+
+**Interactive Selection Interface**: When you run the command without the `--ai` option, you'll see an interactive menu where you can use the UP/DOWN arrow keys to navigate and press ENTER to select your AI assistant. Similarly, if you don't specify the `--script` option, you'll be prompted to choose between POSIX Shell (bash/zsh) and PowerShell scripts using the same interactive interface.
 
 The CLI will check if you have Claude Code, Gemini CLI, Cursor CLI, Qwen CLI, opencode, Codex CLI, Qoder CLI, or Amazon Q Developer CLI installed. If you do not, or you prefer to get the templates without checking for the right tools, use `--ignore-agent-tools` with your command:
 

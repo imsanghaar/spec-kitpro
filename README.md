@@ -46,13 +46,13 @@ Spec-Driven Development **flips the script** on traditional software development
 Install using `uv` (Recommended):
 
 ```bash
-uv tool install specifypro-cli --from git+https://github.com/imsanghaar/spec-kitpro
+uv tool install specifypro --from git+https://github.com/imsanghaar/spec-kitpro
 ```
 
 To upgrade SpecifyPro, see the [Upgrade Guide](./docs/upgrade.md) for detailed instructions. Quick upgrade:
 
 ```bash
-uv tool install specifypro-cli --force --from git+https://github.com/imsanghaar/spec-kitpro
+uv tool install specifypro --force --from git+https://github.com/imsanghaar/spec-kitpro
 ```
 
 #### One-time Usage
@@ -103,7 +103,7 @@ sp init --here --ai claude
 To upgrade SpecifyPro, see the [Upgrade Guide](./docs/upgrade.md) for detailed instructions. Quick upgrade:
 
 ```bash
-uv tool install specifypro-cli --force --from git+https://github.com/imsanghaar/spec-kitpro
+uv tool install specifypro --force --from git+https://github.com/imsanghaar/spec-kitpro
 ```
 
 #### Option 2: One-time Usage
